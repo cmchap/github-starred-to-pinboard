@@ -24,15 +24,18 @@ Run the script and follow the directions.
 
 Requirements
 ------------
+
+python 2.6 - 2.7.5
 [Requests](http://docs.python-requests.org/en/latest/)
 
 Limitations
 -----------
-* Requires python 2.6 - 2.7.5
-* It only works for the 100 most recently starred repos.
+
+It only works for the 100 most recently starred repos.
 
 TODO
 ----
+
 * Make it work for folks who have more than 100 starred repos. (github api)
 * Make it fail more gracefully
 	* Pinboard rate limit failure (once every 3 seconds)

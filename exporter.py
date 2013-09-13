@@ -15,8 +15,7 @@ tags = "github programming" #max of 100 tags, separated by spaces
 ## Functions ##
 ###############
 
-
-import json, requests, time
+import requests, time
 
 def postToPinboard(pb_token, url, title, long_description, tags, replace):
 
@@ -38,10 +37,9 @@ def postToPinboard(pb_token, url, title, long_description, tags, replace):
     	return 0
     elif rStatus == 429:
     	print "Whoa, Nellie! We're goin' too fast! Hold on, and we'll try again in a moment."
-    	time.sleep(3) # Pinboard API mandates 1 call every 3 seconds per user.
-    	postToPinboard(pb_token, url, title, long_description, tags)
-    	return 1
-    elif rStatus != 200 and rStatus != 403 and rStatus != 429:
+    	time.sleep(3) # Pinboard API allows for 1 call every 3 seconds per user.
+    	return postToPinboard(pb_token, url, title, long_description, tags)
+    else:
     	print "Something went wrong. I don't know what, but the http status code was " + rStatus
     	return 0
 
@@ -51,7 +49,7 @@ def getLangs(langs_url, gh_token):
 	if l == "{}":
 		return langs
 	else:
-		l = json.loads(l.text)
+		l = l.json()
 		langs_sorted = sorted(l.iteritems(), key=lambda bytes: -bytes[1]) #sort the languages into a list by most bytes.
 		for x in langs_sorted:
 		 	langs += "%s = %s bytes\n" % (x[0], x[1])
@@ -61,14 +59,14 @@ def getLangs(langs_url, gh_token):
 ##############
 ## Get info ##
 ##############
-#
+
 print "Enter a Github username to get their starred repos:"
 gh_username = raw_input()
 print "Now go to https://github.com/settings/applications, and create a new token, and paste it here."
 gh_token = raw_input()
 url = 'https://api.github.com/users/' + gh_username + '/starred?page=1&per_page=100' # Only works on the first 100 starred repos.
 r = requests.get(url + "&access_token=" + gh_token)
-stars = json.loads(r.content)
+stars = r.json()
 print "Enter your Pinboard api token in the form username:XXXXXXXXXXXXXXXXXXXX\nYou can get it from here: https://pinboard.in/settings/password"
 pb_token = raw_input()
 
@@ -109,4 +107,9 @@ for item in range(len(stars)):
 	pAdd = postToPinboard(pb_token, url, title, long_description, tags, replace)
 	if pAdd == 1:
 		count +=1
-print "You're all done. All " + str(count) + " repos above have been added to pinboard!"
+if count == 0:
+	print "Whoopsh. Something went wrong, so we didn't add anything to your Pinboard."
+elif count == 1:
+	print "You're all done. You only had one starred repo, so we added that to Pinboard. Go star more repos!"
+elif count > 1:
+	print "You're all done. All " + str(count) + " repos above have been added to pinboard!"
