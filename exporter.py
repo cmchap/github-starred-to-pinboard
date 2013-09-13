@@ -4,16 +4,29 @@
 
 # Distributed under the WTF Public License (www.wtfpl.net)
 
+##############
+## Settings ##
+##############
+
+replace = "no" #change to "yes" if you want it to replace previously bookmarked repos
+tags = "github programming" #max of 100 tags, separated by spaces
+
+###############
+## Functions ##
+###############
+
+
 import json, requests, time
 
-def postToPinboard(pb_token, url, title, long_description, tags):
+def postToPinboard(pb_token, url, title, long_description, tags, replace):
 
     payload = {
         'auth_token': pb_token,
         'url': url,
         'description': title,
         'extended': long_description,
-        'tags': tags
+        'tags': tags,
+        'replace': replace
     }
     r = requests.get('https://api.pinboard.in/v1/posts/add', params=payload)
     rStatus = r.status_code
@@ -24,7 +37,7 @@ def postToPinboard(pb_token, url, title, long_description, tags):
     	print "Your token didn't seem to work. It should look sorta like this: username:XXXXXXXXXXXXXXXXXXXX"
     	return 0
     elif rStatus == 429:
-    	print "Whoa nelly! We're goin' too fast! Hold on and we'll try again in a moment."
+    	print "Whoa, Nellie! We're goin' too fast! Hold on, and we'll try again in a moment."
     	time.sleep(3) # Pinboard API mandates 1 call every 3 seconds per user.
     	postToPinboard(pb_token, url, title, long_description, tags)
     	return 1
@@ -44,7 +57,11 @@ def getLangs(langs_url, gh_token):
 		 	langs += "%s = %s bytes\n" % (x[0], x[1])
 		return langs
 
-### GET USER'S STARRED ITEMS LIST
+
+##############
+## Get info ##
+##############
+#
 print "Enter a Github username to get their starred repos:"
 gh_username = raw_input()
 print "Now go to https://github.com/settings/applications, and create a new token, and paste it here."
@@ -54,6 +71,10 @@ r = requests.get(url + "&access_token=" + gh_token)
 stars = json.loads(r.content)
 print "Enter your Pinboard api token in the form username:XXXXXXXXXXXXXXXXXXXX\nYou can get it from here: https://pinboard.in/settings/password"
 pb_token = raw_input()
+
+###############
+## Main loop ##
+###############
 
 print "Adding your starred repos to Pinboard..."
 
@@ -84,10 +105,8 @@ for item in range(len(stars)):
 	    long_description += "\nHomepage: " + homepage
 	if langs != []:
 	    long_description+= "\nLanguages:\n" + langs #max 65536 characters according to pinboard api.
-	#Make the tags
-	tags = "github programming" #max of 100 tags, separated by spaces
 
-	pAdd = postToPinboard(pb_token, url, title, long_description, tags)
+	pAdd = postToPinboard(pb_token, url, title, long_description, tags, replace)
 	if pAdd == 1:
 		count +=1
 print "You're all done. All " + str(count) + " repos above have been added to pinboard!"
