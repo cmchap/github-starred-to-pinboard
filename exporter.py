@@ -33,8 +33,9 @@ def postToPinboard(pb_token, url, title, long_description, tags, replace):
     	print "Added " + title
     	return 1
     elif rStatus == 403:
-    	print "Your token didn't seem to work.\nYou should go get it from here: https://pinboard.in/settings/password"
-    	print "It should look sorta like this: username:XXXXXXXXXXXXXXXXXXXX"
+    	print "Your Pinboard token didn't seem to work.\nYou should go get it from here: https://pinboard.in/settings/password"
+    	print "And paste it below.\nIt should look sorta like this: username:XXXXXXXXXXXXXXXXXXXX"
+    	global pb_token
     	pb_token = raw_input()
     	return postToPinboard(pb_token, url, title, long_description, tags)
     elif rStatus == 429:
