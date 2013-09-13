@@ -17,7 +17,7 @@ tags = "github programming" #max of 100 tags, separated by spaces
 
 import requests, time
 
-def postToPinboard(pb_token, url, title, long_description, tags, replace):
+def post_to_pinboard(pb_token, url, title, long_description, tags, replace):
 
     payload = {
         'auth_token': pb_token,
@@ -28,36 +28,35 @@ def postToPinboard(pb_token, url, title, long_description, tags, replace):
         'replace': replace
     }
     r = requests.get('https://api.pinboard.in/v1/posts/add', params=payload)
-    rStatus = r.status_code
-    if rStatus == 200:
+    r_status = r.status_code
+    if r_status == 200:
     	print "Added " + title
     	return 1
-    elif rStatus == 403:
+    elif r_status == 403:
     	print "Your Pinboard token didn't seem to work.\nYou should go get it from here: https://pinboard.in/settings/password"
     	print "And paste it below.\nIt should look sorta like this: username:XXXXXXXXXXXXXXXXXXXX"
     	global pb_token
     	pb_token = raw_input()
-    	return postToPinboard(pb_token, url, title, long_description, tags)
-    elif rStatus == 429:
+    	return post_to_pinboard(pb_token, url, title, long_description, tags)
+    elif r_status == 429:
     	print "Whoa, Nellie! We're goin' too fast! Hold on, and we'll try again in a moment."
     	time.sleep(3) # Pinboard API allows for 1 call every 3 seconds per user.
-    	return postToPinboard(pb_token, url, title, long_description, tags)
+    	return post_to_pinboard(pb_token, url, title, long_description, tags)
     else:
-    	print "Something went wrong. I don't know what, but the http status code was " + rStatus
+    	print "Something went wrong. I don't know what, but the http status code was " + r_status
     	return 0
 
-def getLangs(langs_url, gh_token):
+def get_langs(langs_url, gh_token):
 	langs = ""
-	l = requests.get("%s?access_token=%s" % (langs_url, gh_token))
-	if l == "{}":
+	lang_data = requests.get("%s?access_token=%s" % (langs_url, gh_token))
+	if lang_data == "{}":
 		return langs
 	else:
-		l = l.json()
-		langs_sorted = sorted(l.iteritems(), key=lambda bytes: -bytes[1]) #sort the languages into a list by most bytes.
+		lang_data = lang_data.json()
+		langs_sorted = sorted(lang_data.iteritems(), key=lambda bytes: -bytes[1]) #sort the languages into a list by most bytes.
 		for x in langs_sorted:
 		 	langs += "%s = %s bytes\n" % (x[0], x[1])
 		return langs
-
 
 ##############
 ## Get info ##
@@ -104,7 +103,7 @@ for item in range(len(stars)):
 
 	#Make the programming languages of the repo in order of most bytes.
 	langs_url = stars[item]['languages_url']
-	langs = getLangs(langs_url, gh_token)
+	langs = get_langs(langs_url, gh_token)
 
 	#Make the description
 	long_description = "This is a github repo. \nName: " + name
@@ -114,8 +113,8 @@ for item in range(len(stars)):
 	if langs != []:
 	    long_description+= "\nLanguages:\n" + langs #max 65536 characters according to pinboard api.
 
-	pAdd = postToPinboard(pb_token, url, title, long_description, tags, replace)
-	if pAdd == 1:
+	pinboard_add = post_to_pinboard(pb_token, url, title, long_description, tags, replace)
+	if pinboard_add == 1:
 		count +=1
 if count == 0:
 	print "Whoopsh. Something went wrong, so we didn't add anything to your Pinboard."
