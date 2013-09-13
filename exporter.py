@@ -33,8 +33,10 @@ def postToPinboard(pb_token, url, title, long_description, tags, replace):
     	print "Added " + title
     	return 1
     elif rStatus == 403:
-    	print "Your token didn't seem to work. It should look sorta like this: username:XXXXXXXXXXXXXXXXXXXX"
-    	return 0
+    	print "Your token didn't seem to work.\nYou should go get it from here: https://pinboard.in/settings/password"
+    	print "It should look sorta like this: username:XXXXXXXXXXXXXXXXXXXX"
+    	pb_token = raw_input()
+    	return postToPinboard(pb_token, url, title, long_description, tags)
     elif rStatus == 429:
     	print "Whoa, Nellie! We're goin' too fast! Hold on, and we'll try again in a moment."
     	time.sleep(3) # Pinboard API allows for 1 call every 3 seconds per user.
