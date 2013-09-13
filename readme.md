@@ -1,7 +1,7 @@
 Github Starred Repos to Pinboard Bookmarks
 ==========================================
 
-It adds the first 100 starred repos from a Github account into bookmarks in Pinboard.
+It turns the 100 most recently starred repos from a Github account into bookmarks in Pinboard.
 
 It makes the bookmark like this:
 ![example bookmark](https://dl.dropbox.com/s/n3tpzmlo8k13fxd/example.png)
@@ -15,7 +15,11 @@ Get your Github OAuth token from [here](https://github.com/settings/applications
 
 Get your Pinboard API token from [here](https://pinboard.in/settings/password).
 
-run the script and follow the directions.
+If you already have some of these repos bookmarked, this script will not replace them. If you wish to change this, set the ```replace``` variable to "yes"
+
+The bookmarks will be tagged with "github" and "programming". You can change this with the ```tag``` variable.
+
+Run the script and follow the directions.
 
 
 Requirements
@@ -25,7 +29,7 @@ Requirements
 Limitations
 -----------
 * Requires python 2.6 - 2.7.5
-* It only works for 100 starred repos.
+* It only works for the 100 most recently starred repos.
 
 TODO
 ----
