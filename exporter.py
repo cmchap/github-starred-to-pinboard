@@ -64,9 +64,16 @@ print "Enter a Github username to get their starred repos:"
 gh_username = raw_input()
 print "Now go to https://github.com/settings/applications, and create a new token, and paste it here."
 gh_token = raw_input()
-url = 'https://api.github.com/users/' + gh_username + '/starred?page=1&per_page=100' # Only works on the first 100 starred repos.
+url = 'https://api.github.com/users/' + gh_username + '/starred?page=1&per_page=100' # Fetches 100 starred repos at a time
 r = requests.get(url + "&access_token=" + gh_token)
 stars = r.json()
+while r.links:
+	if 'next' in r.links:
+		url = r.links['next']['url']
+		r = requests.get(url + "&access_token=" + gh_token)
+	        stars.extend(r.json())
+        else:
+            break
 print "Enter your Pinboard api token in the form username:XXXXXXXXXXXXXXXXXXXX\nYou can get it from here: https://pinboard.in/settings/password"
 pb_token = raw_input()
 
