@@ -26,17 +26,18 @@ Requirements
 ------------
 
 python 2.6 - 2.7.5
+
 [Requests](http://docs.python-requests.org/en/latest/)
 
 Limitations
 -----------
 
-It only works for the 100 most recently starred repos.
+<del>It only works for the 100 most recently starred repos.</del> It works for any number of repos. Thanks, [jdherg](https://github.com/jdherg)!
 
 TODO
 ----
 
-* Make it work for folks who have more than 100 starred repos. (github api)
+* <del>Make it work for folks who have more than 100 starred repos.</del>
 * Make it fail more gracefully
 	* Pinboard rate limit failure (once every 3 seconds)
 	* Github rate limit failure (60 per hour unauthenticated or 5000 authenticated)
