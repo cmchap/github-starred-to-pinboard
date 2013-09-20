@@ -37,13 +37,13 @@ def post_to_pinboard(pb_token, url, title, long_description, tags, replace):
     	print "And paste it below.\nIt should look sorta like this: username:XXXXXXXXXXXXXXXXXXXX"
     	global pb_token
     	pb_token = raw_input()
-    	return post_to_pinboard(pb_token, url, title, long_description, tags)
+    	return post_to_pinboard(pb_token, url, title, long_description, tags, replace)
     elif r_status == 429:
     	print "Whoa, Nellie! We're goin' too fast! Hold on, and we'll try again in a moment."
     	time.sleep(3) # Pinboard API allows for 1 call every 3 seconds per user.
-    	return post_to_pinboard(pb_token, url, title, long_description, tags)
+    	return post_to_pinboard(pb_token, url, title, long_description, tags, replace)
     else:
-    	print "Something went wrong. I don't know what, but the http status code was " + r_status
+    	print "Something went wrong while trying to bookmark " + title + ". I don't know what, but the http status code was " + r_status
     	return 0
 
 def get_langs(langs_url, gh_token):
@@ -67,16 +67,16 @@ def test_token(url, token):
 		return 1
 
 
-
 ##############
 ## Get info ##
 ##############
 
+#Github
 print "Enter a Github username to get their starred repos:"
 gh_username = raw_input()
 print "Now go to https://github.com/settings/applications, and create a new token, and paste it here."
 gh_token = raw_input()
-url = 'https://api.github.com/users/' + gh_username + '/starred?page=1&per_page=100' # Only works on the first 100 starred repos.
+url = 'https://api.github.com/users/' + gh_username + '/starred?page=1&per_page=100' # Fetches 100 starred repos per page
 
 #Test Github token
 token_tests = 3
@@ -91,7 +91,16 @@ while test_token(url, gh_token) == 0:
 
 r = requests.get(url + "&access_token=" + gh_token)
 stars = r.json()
-print "Enter your Pinboard API token in the form username:XXXXXXXXXXXXXXXXXXXX\nYou can get it from here: https://pinboard.in/settings/password"
+while r.links: # iterate through the pages of github starred repos
+	if 'next' in r.links:
+		url = r.links['next']['url']
+		r = requests.get(url + "&access_token=" + gh_token)
+	        stars.extend(r.json())
+        else:
+            break
+
+#Pinboard
+print "Enter your Pinboard api token in the form username:XXXXXXXXXXXXXXXXXXXX\nYou can get it from here: https://pinboard.in/settings/password"
 pb_token = raw_input()
 
 #Test Pinboard token
