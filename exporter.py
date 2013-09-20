@@ -15,7 +15,7 @@ tags = "github programming" #max of 100 tags, separated by spaces
 ## Functions ##
 ###############
 
-import requests, time
+import requests, time, sys
 
 def post_to_pinboard(pb_token, url, title, long_description, tags, replace):
 
@@ -58,6 +58,16 @@ def get_langs(langs_url, gh_token):
 		 	langs += "%s = %s bytes\n" % (x[0], x[1])
 		return langs
 
+def test_token(url, token):
+	auth = {'auth_token': token}
+	r = requests.get(url, params=auth)
+	if r.status_code == 403:
+		return 0
+	else:
+		return 1
+
+
+
 ##############
 ## Get info ##
 ##############
@@ -67,10 +77,34 @@ gh_username = raw_input()
 print "Now go to https://github.com/settings/applications, and create a new token, and paste it here."
 gh_token = raw_input()
 url = 'https://api.github.com/users/' + gh_username + '/starred?page=1&per_page=100' # Only works on the first 100 starred repos.
+
+#Test Github token
+token_tests = 3
+while test_token(url, gh_token) == 0:
+	if token_tests > 0:
+		token_tests  = token_tests - 1
+		print "Your Github token didn't seem to work. Can you try entering it in again?"
+		gh_token = raw_input()
+	else:
+		print "It seems like your token isn't working.\nYou can try running this script again, but the Github API may be down."
+		sys.exit()
+
 r = requests.get(url + "&access_token=" + gh_token)
 stars = r.json()
-print "Enter your Pinboard api token in the form username:XXXXXXXXXXXXXXXXXXXX\nYou can get it from here: https://pinboard.in/settings/password"
+print "Enter your Pinboard API token in the form username:XXXXXXXXXXXXXXXXXXXX\nYou can get it from here: https://pinboard.in/settings/password"
 pb_token = raw_input()
+
+#Test Pinboard token
+token_tests = 3
+while test_token(url, pb_token) == 0:
+	if token_tests > 0:
+		token_tests  = token_tests - 1
+		print "Your Pinboard API token didn't seem to work. Can you try entering it in again?"
+		gh_token = raw_input()
+	else:
+		print "It seems like your token isn't working.\nYou can try running this script again, but the Pinboard API may be down."
+		sys.exit()
+
 
 ###############
 ## Main loop ##
