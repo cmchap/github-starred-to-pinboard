@@ -1,7 +1,7 @@
 Github Starred Repos to Pinboard Bookmarks
 ==========================================
 
-It turns the 100 most recently starred repos from a Github account into bookmarks in Pinboard.
+It turns recently starred repos from a Github account into bookmarks in Pinboard.
 
 It makes the bookmark like this:
 ![example bookmark](https://dl.dropbox.com/s/n3tpzmlo8k13fxd/example.png)
