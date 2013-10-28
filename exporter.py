@@ -35,7 +35,6 @@ def post_to_pinboard(pb_token, url, title, long_description, tags, replace):
     elif r_status == 403:
     	print "Your Pinboard token didn't seem to work.\nYou should go get it from here: https://pinboard.in/settings/password"
     	print "And paste it below.\nIt should look sorta like this: username:XXXXXXXXXXXXXXXXXXXX"
-    	global pb_token
     	pb_token = raw_input()
     	return post_to_pinboard(pb_token, url, title, long_description, tags, replace)
     elif r_status == 429:
