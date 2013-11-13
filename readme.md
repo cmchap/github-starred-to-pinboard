@@ -4,7 +4,8 @@ Github Starred Repos to Pinboard Bookmarks
 It turns recently starred repos from a Github account into bookmarks in Pinboard.
 
 It makes the bookmark like this:
-![example bookmark](https://dl.dropbox.com/s/n3tpzmlo8k13fxd/example.png)
+
+![example bookmark](https://raw.github.com/cmchap/github-starred-to-pinboard/master/screenshot.png)
 
 That is, it sets the bookmark title to the repo name followed by the short, one-liner repo description. It fleshes out the description with pertinent info. It even lists the languages used in the repo in order of bytes. Just for you. Because I like you.
 
