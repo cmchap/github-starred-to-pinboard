@@ -15,10 +15,9 @@ tags = "github programming" #max of 100 tags, separated by spaces
 ## Functions ##
 ###############
 
-import requests, time, sys, base64
+import requests, time, sys
 
 def post_to_pinboard(pb_token, url, title, long_description, tags, replace):
-
     payload = {
         'auth_token': pb_token,
         'url': url,
@@ -41,8 +40,14 @@ def post_to_pinboard(pb_token, url, title, long_description, tags, replace):
         print "Whoa, Nellie! We're goin' too fast! Hold on, and we'll try again in a moment."
         time.sleep(3) # Pinboard API allows for 1 call every 3 seconds per user.
         return post_to_pinboard(pb_token, url, title, long_description, tags, replace)
+    elif r_status == 414:
+
+        print "I tried to add " + title + ", but our api request url was too long. I'll shorten the description to make it fit."
+        max_description_length = len(r.url) - 4103
+        long_description = smart_truncate(long_description, max_description_length, "")
+        return post_to_pinboard(pb_token, url, title, long_description, tags, replace)
     else:
-        print "Something went wrong while trying to bookmark " + title + ". I don't know what, but the http status code was " + r_status
+        print "Something went wrong while trying to bookmark " + title + ". I don't know what, but the http status code was " + str(r_status)
         return 0
 
 def get_langs(langs_url, gh_token):
@@ -57,10 +62,13 @@ def get_langs(langs_url, gh_token):
             langs += "%s = %s bytes\n" % (x[0], x[1])
         return langs
 
-def get_readme(api_url):
-    r = requests.get(api_url + "/readme")
-    if 300 >= r.status_code >=200:
-        return base64.b64decode(r.json()['content'])
+def get_readme(api_url, gh_token):
+    r = requests.get(api_url + "/readme?access_token=" + gh_token)
+    readme = r.json()['content']
+    readme = readme.decode(encoding='UTF-8')
+    readme = readme.encode(encoding='ascii', errors='ignore')
+    if 300 > r.status_code >=200:
+        return readme
     else:
         return "none listed"
 
@@ -72,6 +80,11 @@ def test_token(url, token):
     else:
         return 1
 
+def smart_truncate(content, length=100, suffix='...'):
+    if len(content) <= length:
+        return content
+    else:
+        return content[:length+1-len(suffix)].rsplit(' ',1)[0] + suffix
 
 ##############
 ## Get info ##
@@ -149,9 +162,9 @@ for item in range(len(stars)):
     langs = get_langs(langs_url, gh_token) + "\n\n"
 
     #Make readme
-    readme = get_readme(repo_api_url)
+    readme = get_readme(repo_api_url, gh_token)
 
-    #Make the description. Max 65536 characters.
+    #Make the description.
     long_description = "Github repo \nName: " + name
     long_description += "\nTagline: " + tagline
     if homepage != "none listed":
@@ -160,6 +173,13 @@ for item in range(len(stars)):
         long_description += "\nLanguages:\n" + langs
     if readme != "none listed":
         long_description += readme
+
+    #test string lengths.
+    #Max description =  65536 characters according to the docs.
+    #in reality, the entire get cannot be longer than 4103 characters
+    long_description = smart_truncate(long_description, 65536)
+    # max title is 255
+    title = smart_truncate(title, 255)
 
     pinboard_add = post_to_pinboard(pb_token, repo_url, title, long_description, tags, replace)
     if pinboard_add == 1:
