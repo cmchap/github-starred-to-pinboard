@@ -42,9 +42,9 @@ def post_to_pinboard(pb_token, url, title, long_description, tags, replace):
         return post_to_pinboard(pb_token, url, title, long_description, tags, replace)
     elif r_status == 414:
 
-        print "I tried to add " + title + ", but our api request url was too long. I'll shorten the description to make it fit."
-        max_description_length = len(r.url) - 4103
-        long_description = smart_truncate(long_description, max_description_length, "")
+        print "I tried to add " + title + ", but the api request url was too long. I'll shorten the description to make it fit."
+        long_description = smart_truncate_url(long_description)
+        print "length of the long description is " + str(len(long_description))
         return post_to_pinboard(pb_token, url, title, long_description, tags, replace)
     else:
         print "Something went wrong while trying to bookmark " + title + ". I don't know what, but the http status code was " + str(r_status)
@@ -66,7 +66,7 @@ def get_readme(api_url, gh_token):
     r = requests.get(api_url + "/readme?access_token=" + gh_token)
     readme = r.json()['content']
     readme = readme.decode(encoding='UTF-8')
-    readme = readme.encode(encoding='ascii', errors='ignore')
+    #readme = readme.encode(encoding='ascii', errors='ignore')
     if 300 > r.status_code >=200:
         return readme
     else:
@@ -85,6 +85,15 @@ def smart_truncate(content, length=100, suffix='...'):
         return content
     else:
         return content[:length+1-len(suffix)].rsplit(' ',1)[0] + suffix
+
+def smart_truncate_url(content, length=4103, suffix='%2E%2E%2E', delimiter='%20'):
+    # max description length is 4103 specified here https://groups.google.com/forum/#!msg/pinboard-dev/Od6sCzREeBU/L-WKgX6vUDoJ
+    if len(content) <= length:
+        return content
+    else:
+        print "length was " + str(len(content))
+        print "now length is " + str(len(content[:length-len(suffix)].rsplit(delimiter, 1)[0] + suffix))
+        return content[:length-len(suffix)].rsplit(delimiter, 1)[0] + suffix
 
 ##############
 ## Get info ##
@@ -172,14 +181,15 @@ for item in range(len(stars)):
     if langs != []:
         long_description += "\nLanguages:\n" + langs
     if readme != "none listed":
+        long_description = long_description.encode(encoding='UTF-8', errors='ignore')
         long_description += readme
 
     #test string lengths.
     #Max description =  65536 characters according to the docs.
     #in reality, the entire get cannot be longer than 4103 characters
-    long_description = smart_truncate(long_description, 65536)
+    long_description = smart_truncate(long_description, length=65536)
     # max title is 255
-    title = smart_truncate(title, 255)
+    title = smart_truncate(title, length=255)
 
     pinboard_add = post_to_pinboard(pb_token, repo_url, title, long_description, tags, replace)
     if pinboard_add == 1:
