@@ -9,43 +9,43 @@
 ##############
 
 replace = "no" #change to "yes" if you want it to replace previously bookmarked repos
-tags = "github programming" #max of 100 tags, separated by spaces
+tags = "github programming github-starred-to-pinboard" #max of 100 tags, separated by spaces
 
 ###############
 ## Functions ##
 ###############
 
-import requests, time, sys
+import requests, time, sys, re, base64, urllib
 
-def post_to_pinboard(pb_token, url, title, long_description, tags, replace):
+def post_to_pinboard(pb_token, url, title, long_description, tags, replace, name, length=4103):
     payload = {
         'auth_token': pb_token,
         'url': url,
         'description': title,
         'extended': long_description,
         'tags': tags,
-        'replace': replace
+        'replace': replace,
+        'extended': long_description
     }
     r = requests.get('https://api.pinboard.in/v1/posts/add', params=payload)
     r_status = r.status_code
     if r_status == 200:
-        print "Added " + title
+        print "Added " + name
         return 1
     elif r_status == 403:
         print "Your Pinboard token didn't seem to work.\nYou should go get it from here: https://pinboard.in/settings/password"
         print "And paste it below.\nIt should look sorta like this: username:XXXXXXXXXXXXXXXXXXXX"
         pb_token = raw_input()
-        return post_to_pinboard(pb_token, url, title, long_description, tags, replace)
+        return post_to_pinboard(pb_token, url, title, long_description, tags, replace, name)
     elif r_status == 429:
         print "Whoa, Nellie! We're goin' too fast! Hold on, and we'll try again in a moment."
         time.sleep(3) # Pinboard API allows for 1 call every 3 seconds per user.
-        return post_to_pinboard(pb_token, url, title, long_description, tags, replace)
+        return post_to_pinboard(pb_token, url, title, long_description, tags, replace, name)
     elif r_status == 414:
-
-        print "I tried to add " + title + ", but the api request url was too long. I'll shorten the description to make it fit."
-        long_description = smart_truncate_url(long_description)
-        print "length of the long description is " + str(len(long_description))
-        return post_to_pinboard(pb_token, url, title, long_description, tags, replace)
+        print "The api request for " + name + " was " + str(len(r.url)-length) + " characters too long."
+        print "Shortening..."
+        truncated_long_description = smart_truncate_extended(r.url, length)
+        return post_to_pinboard(pb_token, url, title, truncated_long_description, tags, replace, name)
     else:
         print "Something went wrong while trying to bookmark " + title + ". I don't know what, but the http status code was " + str(r_status)
         return 0
@@ -63,11 +63,16 @@ def get_langs(langs_url, gh_token):
         return langs
 
 def get_readme(api_url, gh_token):
+#def get_readme(gh_username, name):
     r = requests.get(api_url + "/readme?access_token=" + gh_token)
-    readme = r.json()['content']
-    readme = readme.decode(encoding='UTF-8')
+    readme_b64 = r.json()['content']
+    readme = base64.b64decode(readme_b64)
     #readme = readme.encode(encoding='ascii', errors='ignore')
+    #r = requests.get("https://raw.github.com/" + gh_username + "/" + name + "/master/readme.md")
     if 300 > r.status_code >=200:
+        # print r.content
+        # return r.content
+        #print readme
         return readme
     else:
         return "none listed"
@@ -86,13 +91,22 @@ def smart_truncate(content, length=100, suffix='...'):
     else:
         return content[:length+1-len(suffix)].rsplit(' ',1)[0] + suffix
 
+def smart_truncate_extended(url, length):
+    ex_desc_urlparam = re.search('(?<=extended=)[^&]*', url).group()
+    len_ex_desc_url_param = len(ex_desc_urlparam)
+    url_len_minus_ex_desc = len(url) - len_ex_desc_url_param
+    new_ex_desc_length = length - url_len_minus_ex_desc
+    truncated_long_description_urlencoded = smart_truncate_url(ex_desc_urlparam, length=new_ex_desc_length)
+    truncated_long_description_urlencoded = truncated_long_description_urlencoded.encode('ascii')
+    return urllib.unquote(truncated_long_description_urlencoded).decode('utf8')
+
 def smart_truncate_url(content, length=4103, suffix='%2E%2E%2E', delimiter='%20'):
     # max description length is 4103 specified here https://groups.google.com/forum/#!msg/pinboard-dev/Od6sCzREeBU/L-WKgX6vUDoJ
     if len(content) <= length:
         return content
     else:
-        print "length was " + str(len(content))
-        print "now length is " + str(len(content[:length-len(suffix)].rsplit(delimiter, 1)[0] + suffix))
+        #print "length was " + str(len(content))
+        #print "now length is " + str(len(content[:length-len(suffix)].rsplit(delimiter, 1)[0] + suffix))
         return content[:length-len(suffix)].rsplit(delimiter, 1)[0] + suffix
 
 ##############
@@ -171,7 +185,7 @@ for item in range(len(stars)):
     langs = get_langs(langs_url, gh_token) + "\n\n"
 
     #Make readme
-    readme = get_readme(repo_api_url, gh_token)
+    readme = get_readme(gh_username, name)
 
     #Make the description.
     long_description = "Github repo \nName: " + name
@@ -191,7 +205,7 @@ for item in range(len(stars)):
     # max title is 255
     title = smart_truncate(title, length=255)
 
-    pinboard_add = post_to_pinboard(pb_token, repo_url, title, long_description, tags, replace)
+    pinboard_add = post_to_pinboard(pb_token, repo_url, title, long_description, tags, replace, name)
     if pinboard_add == 1:
         count +=1
 if count == 0:
