@@ -7,7 +7,7 @@ It makes the bookmark like this:
 
 ![example bookmark](https://raw.github.com/cmchap/github-starred-to-pinboard/master/screenshot.png)
 
-That is, it sets the bookmark title to the repo name followed by the short, one-liner repo description. It fleshes out the description with pertinent info. It even lists the languages used in the repo in order of bytes. Just for you. Because I like you.
+That is, it sets the bookmark title to the repo name followed by the short, one-liner repo description. It lists the languages used in the repo in order of bytes. Just for you. Because I like you. It also lists the beginnings of the readme file. 
 
 Usage
 -----
@@ -18,7 +18,7 @@ Get your Pinboard API token from [here](https://pinboard.in/settings/password).
 
 If you already have some of these repos bookmarked, this script will not replace them. If you wish to change this, set the ```replace``` variable to "yes"
 
-The bookmarks will be tagged with "github" and "programming". You can change this with the ```tag``` variable.
+The bookmarks will be tagged with the terms in the ```tags``` variable.
 
 Run the script and follow the directions.
 
@@ -34,6 +34,8 @@ Limitations
 -----------
 
 <del>It only works for the 100 most recently starred repos.</del> It works for any number of repos. Thanks, [jdherg](https://github.com/jdherg)!
+
+API calls are limited to 4103 characters which really cuts down on how much of the readme file is included in the description. 
 
 TODO
 ----
