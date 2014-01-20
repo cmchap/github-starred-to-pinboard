@@ -177,7 +177,7 @@ for item in range(len(stars)):
     langs = get_langs(langs_url, gh_token) + "\n\n"
 
     #Make readme
-    readme = get_readme(gh_username, name)
+    readme = get_readme(repo_api_url, gh_token)
 
     #Make the description.
     long_description = "Github repo \nName: " + name
