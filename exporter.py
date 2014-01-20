@@ -15,7 +15,7 @@ tags = "github programming github-starred-to-pinboard" #max of 100 tags, separat
 ## Functions ##
 ###############
 
-import requests, time, sys, re, base64, urllib
+import requests, time, sys, re, base64, urllib, ConfigParser, os
 
 def post_to_pinboard(pb_token, url, title, long_description, tags, replace, name, length=4103):
     time.sleep(3) # Pinboard API allows for 1 call every 3 seconds per user
@@ -47,7 +47,7 @@ def post_to_pinboard(pb_token, url, title, long_description, tags, replace, name
         shortened_description = truncate_long_description(r.url, length, long_description)
         return post_to_pinboard(pb_token, url, title, shortened_description, tags, replace, name)
     else:
-        print "Something went wrong while trying to bookmark " + title + ". I don't know what, but the http status code was " + str(r_status)
+        print "Something went wrong while trying to bookmark " + name + ". I don't know what, but the http status code was " + str(r_status)
         return 0
 
 def get_langs(langs_url, gh_token):
@@ -102,27 +102,93 @@ def truncate_long_description(url, length, description):
         new_long_description = urllib.unquote_plus(new_long_description.encode('ascii')) #hopefully puts the url into utf-8 without the url encoding.
         return new_long_description
 
+def get_github_username(sleep=1):
+    if not parser.has_section('github'):
+        parser.add_section('github')
+
+    if not parser.has_option('github', 'username'):
+        print "Enter a Github username to get their starred repos:"
+        gh_username = raw_input()
+    else:
+        gh_username = parser.get('github', 'username')
+
+    test_url = 'http://github.com/' + gh_username
+    if 200 <= requests.get(test_url).status_code < 299:
+        parser.set('github', 'username', gh_username)
+    else:
+        time.sleep(sleep)
+        sleep = sleep*2
+        print "Your Github token didn't seem to work."
+        get_github_username(sleep)
+
+    with open(config_file, 'wb') as configfile:
+        parser.write(configfile)
+    return gh_username
+
+def get_github_token(gh_username, sleep=1):
+    if not parser.has_section('github'):
+        parser.add_section('github')
+
+    if not parser.has_option('github', 'token'):
+        print "Go to https://github.com/settings/applications, and create a new token, and paste it here."
+        gh_token = raw_input()
+    else:
+        gh_token = parser.get('github', 'token')
+
+    test_url = 'https://api.github.com/users/' + gh_username + '/starred?page=1&per_page=100' # Fetches 100 starred repos per page
+    if test_token(test_url, gh_token) == 0:
+        time.sleep(sleep)
+        sleep = sleep*2
+        print "Your Github token didn't seem to work."
+        get_pinboard_token(gh_username, sleep)
+    else:
+        parser.set('github', 'token', gh_token)
+        with open(config_file, 'wb') as configfile:
+            parser.write(configfile)
+        return gh_token
+
+def get_pinboard_token(sleep=1):
+    if not parser.has_section('pinboard'):
+        parser.add_section('pinboard')
+
+    if not parser.has_option('pinboard', 'token'):
+        print "Enter your Pinboard api token in the form username:XXXXXXXXXXXXXXXXXXXX\nYou can get it from here: https://pinboard.in/settings/password"
+        pb_token = raw_input()
+    else:
+        pb_token = parser.get('pinboard', 'token')
+
+    test_url = 'https://api.pinboard.in/v1/posts/recent?count=1'
+    if test_token(test_url, pb_token) == 0:
+        time.sleep(sleep)
+        sleep = sleep*2
+        print "Your Pinboard API token didn't seem to work."
+        get_pinboard_token(sleep)
+    else:
+        parser.set('pinboard', 'token', pb_token)
+        with open(config_file, 'wb') as configfile:
+            parser.write(configfile)
+        return pb_token
+
+
 ##############
 ## Get info ##
 ##############
 
-#Github
-print "Enter a Github username to get their starred repos:"
-gh_username = raw_input()
-print "Now go to https://github.com/settings/applications, and create a new token, and paste it here."
-gh_token = raw_input()
-url = 'https://api.github.com/users/' + gh_username + '/starred?page=1&per_page=100' # Fetches 100 starred repos per page
+config_file = 'github-starred-to-pinboard.config'
+parser = ConfigParser.SafeConfigParser()
+if os.path.exists(config_file):
+    parser.read(config_file)
 
-#Test Github token
-token_tests = 3
-while test_token(url, gh_token) == 0:
-    if token_tests > 0:
-        token_tests  = token_tests - 1
-        print "Your Github token didn't seem to work. Can you try entering it in again?"
-        gh_token = raw_input()
-    else:
-        print "It seems like your token isn't working.\nYou can try running this script again, but the Github API may be down."
-        sys.exit()
+gh_username = get_github_username()
+gh_token = get_github_token(gh_username)
+pb_token = get_pinboard_token()
+
+
+###############
+## Main loop ##
+###############
+
+url = 'https://api.github.com/users/' + gh_username + '/starred?page=1&per_page=100'
 
 r = requests.get(url + "&access_token=" + gh_token)
 stars = r.json()
@@ -133,26 +199,6 @@ while r.links: # iterate through the pages of github starred repos
         stars.extend(r.json())
     else:
         break
-
-#Pinboard
-print "Enter your Pinboard api token in the form username:XXXXXXXXXXXXXXXXXXXX\nYou can get it from here: https://pinboard.in/settings/password"
-pb_token = raw_input()
-
-#Test Pinboard token
-token_tests = 3
-while test_token(url, pb_token) == 0:
-    if token_tests > 0:
-        token_tests  = token_tests - 1
-        print "Your Pinboard API token didn't seem to work. Can you try entering it in again?"
-        gh_token = raw_input()
-    else:
-        print "It seems like your token isn't working.\nYou can try running this script again, but the Pinboard API may be down."
-        sys.exit()
-
-
-###############
-## Main loop ##
-###############
 
 print "Adding your starred repos to Pinboard..."
 

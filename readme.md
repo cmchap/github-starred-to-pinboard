@@ -45,3 +45,4 @@ TODO
 	* Pinboard rate limit failure (once every 3 seconds)
 	* Github rate limit failure (60 per hour unauthenticated <del> or 5000 authenticated</del>). The authenticated limit isn't a problem because the pinboard rate limit is already significantly lower: 3/second, or 1200/hour
 * Add an option to replace existing bookmarks with the original datetime
+* check to ensure the entered github username exists.
