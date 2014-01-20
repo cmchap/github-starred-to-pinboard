@@ -234,7 +234,7 @@ for item in range(len(stars)):
     if langs != []:
         long_description += "\nLanguages:\n" + langs
     if readme != "none listed":
-        long_description = long_description.encode(encoding='UTF-8', errors='ignore')
+        long_description = long_description.encode('UTF-8', 'ignore')
         long_description += readme
 
     #test string lengths.
