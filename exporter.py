@@ -17,7 +17,7 @@ tags = "github programming github-starred-to-pinboard" #max of 100 tags, separat
 
 import requests, time, sys, re, base64, urllib, ConfigParser, os
 
-def post_to_pinboard(pb_token, url, title, long_description, tags, replace, name, length=4103):
+def post_to_pinboard(pb_token, url, title, long_description, tags, replace, name, length=4103, sleep=3):
     time.sleep(3) # Pinboard API allows for 1 call every 3 seconds per user
     payload = [
         ('auth_token', pb_token),
@@ -39,8 +39,9 @@ def post_to_pinboard(pb_token, url, title, long_description, tags, replace, name
         return post_to_pinboard(pb_token, url, title, long_description, tags, replace, name)
     elif r_status == 429:
         print "Whoa, Nellie! We're goin' too fast! Hold on, and we'll try again in a moment."
-        time.sleep(3) # Pinboard API allows for 1 call every 3 seconds per user.
-        return post_to_pinboard(pb_token, url, title, long_description, tags, replace, name)
+        time.sleep(sleep) # Pinboard API allows for 1 call every 3 seconds per user, so we're doubling the wait for each attempt per the docs.
+        sleep = sleep*2
+        return post_to_pinboard(pb_token, url, title, long_description, tags, replace, name, length, sleep)
     elif r_status == 414:
         print "The api request for " + name + " was " + str(len(r.url)-length) + " characters too long."
         print "Shortening..."
