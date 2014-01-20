@@ -18,6 +18,7 @@ tags = "github programming github-starred-to-pinboard" #max of 100 tags, separat
 import requests, time, sys, re, base64, urllib
 
 def post_to_pinboard(pb_token, url, title, long_description, tags, replace, name, length=4103):
+    time.sleep(3) # Pinboard API allows for 1 call every 3 seconds per user
     payload = [
         ('auth_token', pb_token),
         ('url', url),
