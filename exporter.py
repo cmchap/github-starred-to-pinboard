@@ -18,15 +18,14 @@ tags = "github programming github-starred-to-pinboard" #max of 100 tags, separat
 import requests, time, sys, re, base64, urllib
 
 def post_to_pinboard(pb_token, url, title, long_description, tags, replace, name, length=4103):
-    payload = {
-        'auth_token': pb_token,
-        'url': url,
-        'description': title,
-        'extended': long_description,
-        'tags': tags,
-        'replace': replace,
-        'extended': long_description
-    }
+    payload = [
+        ('auth_token', pb_token),
+        ('url', url),
+        ('description', title),
+        ('tags', tags),
+        ('replace', replace),
+        ('extended', long_description)
+    ]
     r = requests.get('https://api.pinboard.in/v1/posts/add', params=payload)
     r_status = r.status_code
     if r_status == 200:
@@ -44,8 +43,8 @@ def post_to_pinboard(pb_token, url, title, long_description, tags, replace, name
     elif r_status == 414:
         print "The api request for " + name + " was " + str(len(r.url)-length) + " characters too long."
         print "Shortening..."
-        truncated_long_description = smart_truncate_extended(r.url, length)
-        return post_to_pinboard(pb_token, url, title, truncated_long_description, tags, replace, name)
+        shortened_description = truncate_long_description(r.url, length, long_description)
+        return post_to_pinboard(pb_token, url, title, shortened_description, tags, replace, name)
     else:
         print "Something went wrong while trying to bookmark " + title + ". I don't know what, but the http status code was " + str(r_status)
         return 0
@@ -85,29 +84,22 @@ def test_token(url, token):
     else:
         return 1
 
-def smart_truncate(content, length=100, suffix='...'):
+def smart_truncate(content, length, suffix):
     if len(content) <= length:
         return content
     else:
         return content[:length+1-len(suffix)].rsplit(' ',1)[0] + suffix
 
-def smart_truncate_extended(url, length):
-    ex_desc_urlparam = re.search('(?<=extended=)[^&]*', url).group()
-    len_ex_desc_url_param = len(ex_desc_urlparam)
-    url_len_minus_ex_desc = len(url) - len_ex_desc_url_param
-    new_ex_desc_length = length - url_len_minus_ex_desc
-    truncated_long_description_urlencoded = smart_truncate_url(ex_desc_urlparam, length=new_ex_desc_length)
-    truncated_long_description_urlencoded = truncated_long_description_urlencoded.encode('ascii')
-    return urllib.unquote(truncated_long_description_urlencoded).decode('utf8')
-
-def smart_truncate_url(content, length=4103, suffix='%2E%2E%2E', delimiter='%20'):
-    # max description length is 4103 specified here https://groups.google.com/forum/#!msg/pinboard-dev/Od6sCzREeBU/L-WKgX6vUDoJ
-    if len(content) <= length:
-        return content
+def truncate_long_description(url, length, description):
+    if len(url) <= length:
+        return description
     else:
-        #print "length was " + str(len(content))
-        #print "now length is " + str(len(content[:length-len(suffix)].rsplit(delimiter, 1)[0] + suffix))
-        return content[:length-len(suffix)].rsplit(delimiter, 1)[0] + suffix
+        length = length-3 #take into account adding the ellipsis.
+        new_url = url[0:length]
+        new_url = re.sub(r'\+[^\+]*$', "...", new_url) # puts an ellipsis after the last word that will fit within the length requirement
+        new_long_description = re.sub(r'^.*extended=', "", new_url) #Gets the url-encoded long description
+        new_long_description = urllib.unquote_plus(new_long_description.encode('ascii')) #hopefully puts the url into utf-8 without the url encoding.
+        return new_long_description
 
 ##############
 ## Get info ##
@@ -201,9 +193,9 @@ for item in range(len(stars)):
     #test string lengths.
     #Max description =  65536 characters according to the docs.
     #in reality, the entire get cannot be longer than 4103 characters
-    long_description = smart_truncate(long_description, length=65536)
+    long_description = smart_truncate(long_description, 65536, '...')
     # max title is 255
-    title = smart_truncate(title, length=255)
+    title = smart_truncate(title, 255, '...')
 
     pinboard_add = post_to_pinboard(pb_token, repo_url, title, long_description, tags, replace, name)
     if pinboard_add == 1:
