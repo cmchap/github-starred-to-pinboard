@@ -7,7 +7,7 @@ It makes the bookmark like this:
 
 ![example bookmark](https://raw.github.com/cmchap/github-starred-to-pinboard/master/screenshot.png)
 
-That is, it sets the bookmark title to the repo name followed by the short, one-liner repo description. It lists the languages used in the repo in order of bytes, too. Just for you. Because I like you. It also lists the beginnings of the readme file.
+That is, it sets the bookmark title to the repo name followed by the short, one-liner repo description. It lists the languages used in the repo in order of bytes, too. Just for you. Because I like you. It also lists the as much of the readme file as will fit in Pinboard's description field. 
 
 Usage
 -----
@@ -20,7 +20,10 @@ If you already have some of these repos bookmarked, this script will not replace
 
 The bookmarks will be tagged with the terms in the ```tags``` variable.
 
-Run the script and follow the directions.
+On first run, it creates a config file with the same base filename as you named this script. (If you didn't rename the script, it'll be called ```github-starred-to-pinboard.config```)
+You can uncomment and fill in ```gh_username```, ```gh_token```, and ```pb_token``` if you do not want to create a config file. 
+
+Otherwise, run the script and follow the directions.
 
 
 Requirements
@@ -42,7 +45,7 @@ TODO
 
 * <del>Make it work for folks who have more than 100 starred repos.</del>
 * Make it fail more gracefully
-	* Pinboard rate limit failure (once every 3 seconds)
+	* <del>Pinboard rate limit failure (once every 3 seconds)<del> done. 
 	* Github rate limit failure (60 per hour unauthenticated <del> or 5000 authenticated</del>). The authenticated limit isn't a problem because the pinboard rate limit is already significantly lower: 3/second, or 1200/hour
 * Add an option to replace existing bookmarks with the original datetime
-* check to ensure the entered github username exists.
+* Check to ensure the entered github username exists.
