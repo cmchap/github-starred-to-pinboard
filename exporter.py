@@ -11,6 +11,11 @@
 replace = "no" #change to "yes" if you want it to replace previously bookmarked repos
 tags = "github programming github-starred-to-pinboard" #max of 100 tags, separated by spaces
 
+# Uncomment these lines and fill them in with your info if you don't want to create a config file.
+# gh_username = "username"
+# gh_token = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+# pb_token = "username:XXXXXXXXXXXXXXXXXXXX"
+
 ###############
 ## Functions ##
 ###############
@@ -183,14 +188,26 @@ def get_current_from_pinboard(pb_token, tags):
 ## Get info ##
 ##############
 
-config_file = 'github-starred-to-pinboard.config'
+# defines the config file as having the same filename as this script with an extension of .config
+config_file = os.path.splitext(__file__)[0] + ".config"
 parser = ConfigParser.SafeConfigParser()
 if os.path.exists(config_file):
     parser.read(config_file)
 
-gh_username = get_github_username()
-gh_token = get_github_token(gh_username)
-pb_token = get_pinboard_token()
+try
+    gh_username
+except
+    gh_username = get_github_username()
+
+try
+    gh_token
+except
+    gh_token = get_github_token(gh_username)
+
+try
+    pb_token
+except
+    pb_token = get_pinboard_token()
 
 
 ###############
