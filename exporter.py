@@ -194,19 +194,19 @@ parser = ConfigParser.SafeConfigParser()
 if os.path.exists(config_file):
     parser.read(config_file)
 
-try
+try:
     gh_username
-except
+except:
     gh_username = get_github_username()
 
-try
+try:
     gh_token
-except
+except:
     gh_token = get_github_token(gh_username)
 
-try
+try:
     pb_token
-except
+except:
     pb_token = get_pinboard_token()
 
 
@@ -250,7 +250,6 @@ for star in stars:
     if replace == "no":
         if repo_url in existing:
             print "Skipping " + name
-            print repo_url
             continue # breaks out of the for loop that iterates through the stars.
 
     tagline = star['description']

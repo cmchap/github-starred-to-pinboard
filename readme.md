@@ -20,7 +20,7 @@ If you already have some of these repos bookmarked, this script will not replace
 
 The bookmarks will be tagged with the terms in the ```tags``` variable.
 
-On first run, it creates a config file with the same base filename as you named this script. (If you didn't rename the script, it'll be called ```github-starred-to-pinboard.config```)
+On first run, it creates a config file with the same base filename as you named this script. (If you didn't rename the script, it'll be called ```exporter.config```)
 You can uncomment and fill in ```gh_username```, ```gh_token```, and ```pb_token``` if you do not want to create a config file. 
 
 Otherwise, run the script and follow the directions.
