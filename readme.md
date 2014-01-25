@@ -16,7 +16,7 @@ Get your Github OAuth token from [here](https://github.com/settings/applications
 
 Get your Pinboard API token from [here](https://pinboard.in/settings/password).
 
-If you already have some of these repos bookmarked, this script will not replace them. If you wish to change this, set the ```replace``` variable to "yes"
+If you already have some of these repos bookmarked, this script will not replace them. If you wish to change this, set the ```replace``` variable to ```no```. Take note that even if ```replace``` is ```yes```, the datetime on the bookmarks will not be altered.
 
 The bookmarks will be tagged with the terms in the ```tags``` variable.
 

@@ -8,7 +8,10 @@
 ## Settings ##
 ##############
 
-replace = "no" #change to "yes" if you want it to replace previously bookmarked repos
+#Change to "no" if you don't want it to replace previously bookmarked repos.
+#Take note that even if replace = yes, the datetime on the bookmarks will not be altered.
+replace = "yes"
+
 tags = "github programming github-starred-to-pinboard" #max of 100 tags, separated by spaces
 
 # Uncomment these lines and fill them in with your info if you don't want to create a config file.
