@@ -250,10 +250,9 @@ for star in stars:
         name = ""
 
     # Skip existing starred repos
-    if replace == "no":
-        if repo_url in existing:
-            print "Skipping " + name
-            continue # breaks out of the for loop that iterates through the stars.
+    if repo_url in existing:
+        print "Skipping " + name
+        continue # breaks out of the for loop that iterates through the stars.
 
     tagline = star['description']
     if tagline == False or tagline == None or tagline == "None" or tagline == "none" or tagline == "" or tagline == "null":
