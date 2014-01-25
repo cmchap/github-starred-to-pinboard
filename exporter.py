@@ -238,6 +238,11 @@ while r.links: # iterate through the pages of github starred repos
     else:
         break
 
+#If the same number of repos are found as are in pinboard, quit the script.
+if len(existing) == len(stars):
+    print "All your repos are already added."
+    sys.exit()
+
 print "Adding your starred repos to Pinboard..."
 
 count = 0
@@ -303,7 +308,7 @@ for star in stars:
     if pinboard_add == 1:
         count +=1
 if count == 0:
-    print "Whoopsh. Something went wrong, so we didn't add anything to your Pinboard."
+    print "Whoopsh. Something went wrong, but we don't know what. We didn't add anything to your Pinboard."
 elif count == 1:
     print "You're all done. You only had one starred repo, so we added that to Pinboard. Go star more repos!"
 elif count > 1:
