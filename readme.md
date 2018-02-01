@@ -16,7 +16,7 @@ Get your Github OAuth token from [here](https://github.com/settings/applications
 
 Get your Pinboard API token from [here](https://pinboard.in/settings/password).
 
-If you already have some of these repos bookmarked, this script will not replace them. If you wish to change this, set the ```replace``` variable to ```no```. Take note that even if ```replace``` is ```yes```, the datetime on the bookmarks will not be altered.
+By default, if you have an existing bookmark with the same URl as a starred repo, this script will change that bookmark to match the above styling. If you wish to change this, set the ```replace``` variable to ```no```. Note that even if ```replace``` is ```yes```, the datetime on existing bookmarks will not be altered by this script.
 
 The bookmarks will be tagged with the terms in the ```tags``` variable.
 
@@ -38,14 +38,19 @@ Limitations
 
 <del>It only works for the 100 most recently starred repos.</del> It works for any number of repos. Thanks, [jdherg](https://github.com/jdherg)!
 
-API calls are limited to 4103 characters which really cuts down on how much of the readme file is included in the description.
+API calls are limited to 4103 characters which really cuts down on how much of the readme file is included in the description. If anybody has a good workaround for this, please submit a pull request. 
 
 TODO
 ----
 
-* <del>Make it work for folks who have more than 100 starred repos.</del>
+* <del>Make it work for folks who have more than 100 starred repos.</del> done.
 * Make it fail more gracefully
 	* <del>Pinboard rate limit failure (once every 3 seconds)<del> done. 
 	* Github rate limit failure (60 per hour unauthenticated <del> or 5000 authenticated</del>). The authenticated limit isn't a problem because the pinboard rate limit is already significantly lower: 3/second, or 1200/hour
-* Add an option to replace existing bookmarks with the original datetime
+	* <del>Add an option to replace existing bookmarks with the original datetime</del> done.
 * Check to ensure the entered github username exists.
+
+LICENSE
+----
+
+This project is licensed under the terms of the MIT license.
